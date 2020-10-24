@@ -16,7 +16,7 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
-PLAYER_MOVEMENT_SPEED = 10
+PLAYER_MOVEMENT_SPEED = 12
 UPDATES_PER_FRAME = 5
 GRAVITY = 1.1
 PLAYER_JUMP_SPEED = 20
@@ -150,7 +150,7 @@ class SootheGame(arcade.Window):
         arcade.schedule(self.add_enemy, 1)
 
         # Spawn a new cloud every 0.75 seconds
-        arcade.schedule(self.add_cloud, 0.75)
+        arcade.schedule(self.add_cloud, 0.6)
 
         # Adding + removing quotes with a viewing interval of 10 seconds
         arcade.schedule(self.add_quote, 15)
@@ -184,9 +184,9 @@ class SootheGame(arcade.Window):
 
     def add_cloud(self, delta_time: float):
 
-        cloud = arcade.Sprite("test-game-KG/sprites/198daeda14097d45e417e62ff283f10e.png", CLOUD_SCALING)
+        cloud = arcade.Sprite("test-game-KG\sprites\cloud.png", CLOUD_SCALING)
         cloud.center_x = random.randint(0,2400)
-        cloud.center_y = 650
+        cloud.center_y = random.randint(600,650)
         self.cloud_list.append(cloud)
         cloud.velocity = (-2,0)
 
@@ -222,7 +222,7 @@ class SootheGame(arcade.Window):
         arcade.start_render()
 
         arcade.draw_lrwh_rectangle_textured(-500, 0,
-                                            SCREEN_WIDTH+2000, SCREEN_HEIGHT,
+                                            SCREEN_WIDTH+1900, SCREEN_HEIGHT,
                                             self.background)
         # Draw sprites
         self.wall_list.draw()
@@ -242,6 +242,7 @@ class SootheGame(arcade.Window):
         score_text = f"Hits: {self.score}"
         arcade.draw_text(score_text, 10 + self.view_left, 620 + self.view_bottom,
                          arcade.csscolor.BLACK, 18)
+        
 
 
     def on_key_press(self, key, modifiers):
@@ -277,7 +278,7 @@ class SootheGame(arcade.Window):
         self.cloud_list.update()
         self.physics_engine.update()
 
-        if self.player_sprite.center_y <= 76:
+        if self.player_sprite.center_y <= 76 or self.player_sprite.center_x < -20 or self.player_sprite.center_x > 2300:
             self.player_sprite.center_y = 100
             self.player_sprite.center_x = 64
 
@@ -353,6 +354,7 @@ class SootheGame(arcade.Window):
 def main():
     window = SootheGame()
     window.setup()
+    arcade.finish_render()
     arcade.run()
 
 
