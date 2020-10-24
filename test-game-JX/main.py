@@ -1,10 +1,12 @@
 import arcade
 import time
 import random
+import os
+file_path = os.path.dirname(os.path.abspath(__file__))
+os.chdir(file_path)
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
-SCREEN_TITLE = "Test-Game"
 
 CHARACTER_SCALING = 0.8
 ENEMY_SCALING = 0.3
@@ -27,17 +29,21 @@ MUSIC_VOLUME = 0.5
 
 class MenuView(arcade.View):
     """ Class that manages the 'menu' view. """
+    def __init__(self):
+
+        super().__init__()
 
     def on_show(self):
         """ Called when switching to this view"""
-        arcade.set_background_color(arcade.color.WHITE)
+        arcade.set_background_color(arcade.color.LIGHT_CYAN)
 
     def on_draw(self):
         """ Draw the menu """
         arcade.start_render()
-        arcade.draw_text("Menu Screen - click to advance", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,
-                         arcade.color.BLACK, font_size=30, anchor_x="center")
-
+        arcade.draw_text("Soothe", SCREEN_WIDTH/2, SCREEN_WIDTH/2,
+                         arcade.color.BLACK, font_size=50, anchor_x="center")
+        arcade.draw_text("Click to advance.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-75,
+                         arcade.color.GRAY, font_size=20, anchor_x="center")
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ Use a mouse press to advance to the 'game' view. """
         game_view = GameView()
@@ -75,11 +81,12 @@ class GameView(arcade.View):
         self.view_bottom = 0
         self.view_left = 0
 
-        self.hit_enemy_sound = arcade.load_sound("test-game-JX\sounds\Bubble-wrap-popping.mp3")
-        # self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
+        self.hit_enemy_sound = arcade.load_sound("assets\\Bubble-wrap-popping.mp3")
 
-        arcade.set_background_color(arcade.csscolor.LIGHT_CYAN)
 
+    def on_show(self):
+        """ Called when switching to this view"""
+        arcade.set_background_color(arcade.color.LIGHT_CYAN)
     def advance_song(self):
         """ Advance our pointer to the next song. This does NOT start the song. """
         self.current_song += 1
@@ -116,7 +123,7 @@ class GameView(arcade.View):
         self.player_list.append(self.player_sprite)
 
         # List of music
-        self.music_list = ["test-game-JX\sounds\Mellow_Thoughts.mp3", "test-game-JX\sounds\Lofi.mp3", "test-game-JX\sounds\Mellow_Thoughts.mp3"]
+        self.music_list = ["assets\\Mellow_Thoughts.mp3", "assets\\Lofi.mp3", "assets\\Homework.mp3"]
         self.current_song = 0
         self.play_song()
 
@@ -172,7 +179,7 @@ class GameView(arcade.View):
 
     def add_cloud(self, delta_time: float):
 
-        cloud = arcade.Sprite("test-game-JX\sprites\cloud.png", ENEMY_SCALING)
+        cloud = arcade.Sprite("assets\\cloud.png", ENEMY_SCALING)
         cloud.center_x = random.randint(0,2400)
         cloud.center_y = 650
         self.cloud_list.append(cloud)
@@ -207,8 +214,8 @@ class GameView(arcade.View):
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
         elif key == arcade.key.ESCAPE:
-            game_over_view = GameOverView()
-            self.window.show_view(game_over_view)
+            pause = PauseView(self)
+            self.window.show_view(pause)
 
     def on_key_release(self, key, modifiers):
 
@@ -286,21 +293,58 @@ class GameView(arcade.View):
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
 
-class GameOverView(arcade.View):
-    """ Class to manage the game over view """
+class PauseView(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view
+
     def on_show(self):
-        """ Called when switching to this view"""
-        arcade.set_background_color(arcade.color.BLACK)
+        arcade.set_background_color(arcade.color.ORANGE)
 
     def on_draw(self):
-        """ Draw the game over view """
         arcade.start_render()
-        arcade.draw_text("Game Over - press ESCAPE to advance", SCREEN_WIDTH/4, SCREEN_HEIGHT/2,
-                         arcade.color.WHITE, 30, anchor_x="center")
+
+        # Draw player, for effect, on pause screen.
+        # The previous View (GameView) was passed in
+        # and saved in self.game_view.
+        player_sprite = self.game_view.player_sprite
+        player_sprite.draw()
+
+        # draw an orange filter over him
+        arcade.draw_lrtb_rectangle_filled(left=player_sprite.left,
+                                          right=player_sprite.right,
+                                          top=player_sprite.top,
+                                          bottom=player_sprite.bottom,
+                                          color=arcade.color.ORANGE + (200,))
+
+        arcade.draw_text("PAUSED", SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50,
+                         arcade.color.BLACK, font_size=50, anchor_x="center")
+
+        # Show tip to return or reset
+        arcade.draw_text("Press Esc. to return",
+                         SCREEN_WIDTH/2,
+                         SCREEN_HEIGHT/2,
+                         arcade.color.BLACK,
+                         font_size=20,
+                         anchor_x="center")
+        arcade.draw_text("Press Enter to go back to main menu",
+                         SCREEN_WIDTH/2,
+                         SCREEN_HEIGHT/2-30,
+                         arcade.color.BLACK,
+                         font_size=20,
+                         anchor_x="center")
+
+    def on_key_press(self, key, _modifiers):
+        if key == arcade.key.ESCAPE:   # resume game
+            self.window.show_view(self.game_view)
+        elif key == arcade.key.ENTER:  # go to main menu
+            menu_view = MenuView()
+            self.window.show_view(menu_view)
+
 
 def main():
     """ Startup """
-    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Different Views Minimal Example")
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Soothe")
     menu_view = MenuView()
     window.show_view(menu_view)
     arcade.run()
