@@ -14,19 +14,19 @@ CHARACTER_SCALING = 2.5
 ENEMY_SCALING = 3
 CLOUD_SCALING = 0.3
 TILE_SCALING = 0.5
-DOOR_SCALING = 1.3
+DOOR_SCALING = 0.42
 SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
-PLAYER_MOVEMENT_SPEED = 10
+PLAYER_MOVEMENT_SPEED = 15
 GRAVITY = 1.1
 PLAYER_JUMP_SPEED = 20
 
 LEFT_VIEWPORT_MARGIN = SCREEN_WIDTH/2
 RIGHT_VIEWPORT_MARGIN = SCREEN_WIDTH/2
 BOTTOM_VIEWPORT_MARGIN = 50
-TOP_VIEWPORT_MARGIN = 350
+TOP_VIEWPORT_MARGIN = 300
 MUSIC_VOLUME = 0.1
 
 class MenuView(arcade.View):
@@ -67,7 +67,8 @@ class GameView(arcade.View):
         self.wall_list = None
         self.player_list = None
         self.doorMid_list = None
-        self.doorTop_list = None
+        self.endDoor_list = None
+        self.drawer_list = None
         self.enemy_list = None
         self.cloud_list = None
 
@@ -106,7 +107,7 @@ class GameView(arcade.View):
 
     def on_show(self):
         """ Called when switching to this view"""
-        arcade.set_background_color(arcade.color.LIGHT_CYAN)
+        arcade.set_background_color((153, 178, 188))
 
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
@@ -115,11 +116,12 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.doorMid_list = arcade.SpriteList()
-        self.doorTop_list = arcade.SpriteList()
+        self.endDoor_list= arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
         self.cloud_list = arcade.SpriteList(use_spatial_hash=True)
         self.quote_list = arcade.SpriteList(use_spatial_hash=True)
         self.trigger_list = arcade.SpriteList(use_spatial_hash=True)
+        self.drawer_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player
         self.player_sprite = arcade.Sprite("assets\\sprites\\player_sprite\\idle1.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
@@ -135,7 +137,7 @@ class GameView(arcade.View):
 
         # Create the ground
         for x in range(0, 2000, 64):
-            wall= arcade.Sprite("assets\\sprites\\grass_tile.png", 2)
+            wall= arcade.Sprite("assets\\sprites\\lobby_floor.png", 0.15)
             wall.center_x = x
             wall.center_y = 3000
             self.wall_list.append(wall)
@@ -152,15 +154,26 @@ class GameView(arcade.View):
         
         # Creates doors to different levels
         for x in range(700, 1250, 250):
-            doorMid = arcade.Sprite(":resources:images/tiles/doorClosed_mid.png", DOOR_SCALING)
+            doorMid = arcade.Sprite("assets\\sprites\\door.png", DOOR_SCALING)
             doorMid.center_x = x
-            doorMid.center_y = 3060
+            doorMid.center_y = 3110
             self.doorMid_list.append(doorMid)
 
-            doorTop = arcade.Sprite(":resources:images/tiles/doorClosed_top.png", DOOR_SCALING)
-            doorTop.center_x = x
-            doorTop.center_y = 3220
-            self.doorTop_list.append(doorTop)
+        endDoor = arcade.Sprite("assets\\sprites\\door.png", DOOR_SCALING)
+        endDoor.center_x = 1900
+        endDoor.center_y = 130
+        self.endDoor_list.append(endDoor)
+
+        endDoor = arcade.Sprite("assets\\sprites\\door.png", DOOR_SCALING)
+        endDoor.center_x = 1900
+        endDoor.center_y = -2900
+        self.endDoor_list.append(endDoor)
+
+        for x in range(825, 1300, 250):
+            drawer = arcade.Sprite("assets\\sprites\\drawer.png", DOOR_SCALING-0.1)
+            drawer.center_x = x
+            drawer.center_y = 3080
+            self.drawer_list.append(drawer)
 
         # Spawn a new enemy every 0.25 seconds
         arcade.schedule(self.add_enemy, 1)
@@ -195,13 +208,14 @@ class GameView(arcade.View):
         # Clear the screen to the background color
         arcade.start_render()
         arcade.draw_lrwh_rectangle_textured(-500, 0,
-                                            SCREEN_WIDTH+2000, SCREEN_HEIGHT,
+                                            SCREEN_WIDTH+2000, SCREEN_HEIGHT+200,
                                             self.background)
 
         # Draw sprites
         self.doorMid_list.draw()
+        self.endDoor_list.draw()
+        self.drawer_list.draw()
         self.wall_list.draw()
-        self.doorTop_list.draw()
         self.player_list.draw()
         self.enemy_list.draw()
         self.cloud_list.draw()
@@ -257,6 +271,14 @@ class GameView(arcade.View):
                 self.levelSelector = 1
             elif hit.center_x == 950:
                 self.levelSelector = 2
+
+        endDoor_collision_list = arcade.check_for_collision_with_list(self.player_sprite,
+                                                             self.endDoor_list)
+
+        for hit in endDoor_collision_list:
+            self.add_return_trigger(hit)
+            self.isInteractive = True
+            self.levelSelector = 0
             
         changed = False
 
@@ -316,7 +338,10 @@ class GameView(arcade.View):
 
         if self.isInteractive:
             if key == arcade.key.ENTER:
-                if self.levelSelector == 1:
+                if self.levelSelector == 0:
+                    self.player_sprite.center_x = 64
+                    self.player_sprite.center_y = 3400
+                elif self.levelSelector == 1:
                     self.player_sprite.center_x = 64
                     self.player_sprite.center_y = 92
                 elif self.levelSelector == 2:
@@ -384,13 +409,19 @@ class GameView(arcade.View):
     def add_triggers(self, door_sprite):
         trigger = arcade.Sprite("assets\\sprites\\level-trigger.png", TILE_SCALING)
         trigger.center_x = door_sprite.center_x
-        trigger.center_y = door_sprite.center_y + 200
+        trigger.center_y = door_sprite.center_y + 120
         self.trigger_list.append(trigger)
 
     def remove_triggers(self, delta_time: float):
         for trigger in self.trigger_list:
             trigger.remove_from_sprite_lists()
          
+    def add_return_trigger(self, door_sprite):
+        trigger = arcade.Sprite("assets\\sprites\\return_trigger.png", TILE_SCALING)
+        trigger.center_x = door_sprite.center_x
+        trigger.center_y = door_sprite.center_y + 120
+        self.trigger_list.append(trigger)
+
 class PauseView(arcade.View):
     def __init__(self, game_view):
         super().__init__()
