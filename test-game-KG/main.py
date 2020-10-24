@@ -48,19 +48,26 @@ class SootheGame(arcade.Window):
         self.enemy_list = None
         self.cloud_list = None
 
+        # initiating physics engine
         self.physics_engine = None
 
+        # init player sprite
         self.player_sprite = None
 
+        # init viewports
         self.view_bottom = 0
         self.view_left = 0
 
         self.hit_enemy_sound = arcade.load_sound("test-game-KG/sounds/Bubble-wrap-popping.mp3")
         # self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 
+        # init quotes sprite
         self.quote_list = None
         self.quotes = []
         self.current_quote = 0 
+
+        # init score for keeping track of hits
+        self.score = 0
 
         arcade.set_background_color(arcade.csscolor.LIGHT_CYAN)
 
@@ -104,6 +111,8 @@ class SootheGame(arcade.Window):
         self.music_list = ["test-game-KG/sounds/2020-09-14_-_Mellow_Thoughts_-_www.FesliyanStudios.com_David_Renda.mp3", "test-game-KG/sounds/relaxing lofi for late nights...😴 (128 kbps).mp3", "test-game-KG/sounds/2019-06-12_-_Homework_-_David_Fesliyan.mp3"]
         self.current_song = 0
         self.play_song()
+
+        self.score = 0
 
         # Create the ground
         for x in range(0, 2000, 64):
@@ -173,12 +182,7 @@ class SootheGame(arcade.Window):
         self.current_quote = random.randint(0, len(self.quotes)-1)
         quote = arcade.Sprite(self.quotes[self.current_quote], TILE_SCALING)
         player_pos = self.player_sprite.center_x
-
-        if player_pos >= 40:
-            quote.center_x = player_pos + 100
-        else:
-            quote.center_x = 500
-
+        quote.center_x = 1000
         quote.center_y = 30
         self.quote_list.append(quote)
 
@@ -205,6 +209,11 @@ class SootheGame(arcade.Window):
         start_x = 70
         start_y = 400
         arcade.draw_text("Soothe Yourself", start_x, start_y, arcade.color.BLACK, 60, font_name='GARA')
+
+        # Draw our score on the screen, scrolling it with the viewport
+        score_text = f"Hits: {self.score}"
+        arcade.draw_text(score_text, 10 + self.view_left, 620 + self.view_bottom,
+                         arcade.csscolor.BLACK, 18)
 
     def on_key_press(self, key, modifiers):
 
@@ -254,6 +263,7 @@ class SootheGame(arcade.Window):
             enemy.remove_from_sprite_lists()
             # Play a sound
             arcade.play_sound(self.hit_enemy_sound)
+            self.score += 1
 
         changed = False
 
