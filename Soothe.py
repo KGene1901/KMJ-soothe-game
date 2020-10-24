@@ -69,6 +69,8 @@ class GameView(arcade.View):
         self.doorMid_list = None
         self.endDoor_list = None
         self.drawer_list = None
+        self.bottomWall_list = None
+        self.window_list = None
         self.enemy_list = None
         self.cloud_list = None
 
@@ -103,7 +105,7 @@ class GameView(arcade.View):
         self.background = None
 
         # init level selector
-        self.levelSelector = None
+        self.levelSelector = 0
 
     def on_show(self):
         """ Called when switching to this view"""
@@ -117,6 +119,8 @@ class GameView(arcade.View):
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.doorMid_list = arcade.SpriteList()
         self.endDoor_list= arcade.SpriteList()
+        self.bottomWall_list = arcade.SpriteList(use_spatial_hash=True)
+        self.window_list = arcade.SpriteList(use_spatial_hash=True)
         self.enemy_list = arcade.SpriteList()
         self.cloud_list = arcade.SpriteList(use_spatial_hash=True)
         self.quote_list = arcade.SpriteList(use_spatial_hash=True)
@@ -169,11 +173,41 @@ class GameView(arcade.View):
         endDoor.center_y = -2900
         self.endDoor_list.append(endDoor)
 
+        # Creates drawers
         for x in range(825, 1300, 250):
             drawer = arcade.Sprite("assets\\sprites\\drawer.png", DOOR_SCALING-0.1)
             drawer.center_x = x
             drawer.center_y = 3080
             self.drawer_list.append(drawer)
+
+        # Creates bottom lining of wall
+        for x in range(44, 1954, 10):
+            lining = arcade.Sprite("assets\\sprites\\bottom-wall.png", DOOR_SCALING-0.1)
+            lining.center_x = x
+            lining.center_y = 3046.5
+            self.bottomWall_list.append(lining)
+
+
+        # creating windows
+        window = arcade.Sprite("assets\\sprites\\lobby_window.png", DOOR_SCALING-0.1)
+        window.center_x = 100
+        window.center_y = 3121
+        self.window_list.append(window)
+
+        window = arcade.Sprite("assets\\sprites\\lobby_window.png", DOOR_SCALING-0.1)
+        window.center_x = 400
+        window.center_y = 3121
+        self.window_list.append(window)
+        
+        window = arcade.Sprite("assets\\sprites\\lobby_window.png", DOOR_SCALING-0.1)
+        window.center_x = 1500
+        window.center_y = 3121
+        self.window_list.append(window)
+
+        window = arcade.Sprite("assets\\sprites\\lobby_window.png", DOOR_SCALING-0.1)
+        window.center_x = 1800
+        window.center_y = 3121
+        self.window_list.append(window)
 
         # Spawn a new enemy every 0.25 seconds
         arcade.schedule(self.add_enemy, 1)
@@ -185,6 +219,7 @@ class GameView(arcade.View):
         arcade.schedule(self.add_quote, 15)
         arcade.schedule(self.remove_quote, 10)
         arcade.schedule(self.remove_triggers, 0.02)
+        arcade.schedule(self.reset_level_selector, 2)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
 
@@ -212,9 +247,11 @@ class GameView(arcade.View):
                                             self.background)
 
         # Draw sprites
+        self.bottomWall_list.draw()
         self.doorMid_list.draw()
         self.endDoor_list.draw()
         self.drawer_list.draw()
+        self.window_list.draw()
         self.wall_list.draw()
         self.player_list.draw()
         self.enemy_list.draw()
@@ -237,8 +274,17 @@ class GameView(arcade.View):
         self.physics_engine.update()
 
         if self.player_sprite.center_x < -20 or self.player_sprite.center_x > 2000:
-            self.player_sprite.center_y = 92
-            self.player_sprite.center_x = 64
+            if self.levelSelector == 0:
+                    self.player_sprite.center_x = 64
+                    self.player_sprite.center_y = 3400
+                    self.arcade.set_background_color((153, 178, 188))
+            elif self.levelSelector == 1:
+                self.player_sprite.center_x = 64
+                self.player_sprite.center_y = 92
+            elif self.levelSelector == 2:
+                self.player_sprite.center_x = 64
+                self.player_sprite.center_y = -3000
+                self.arcade.set_background_color((0, 0, 0))
 
         for enemy in self.enemy_list:
             if enemy.center_x < 40:
@@ -421,6 +467,9 @@ class GameView(arcade.View):
         trigger.center_x = door_sprite.center_x
         trigger.center_y = door_sprite.center_y + 120
         self.trigger_list.append(trigger)
+
+    def reset_level_selector(self, delta_time: float):
+        self.levelSelector = 0
 
 class PauseView(arcade.View):
     def __init__(self, game_view):
