@@ -72,6 +72,8 @@ class SootheGame(arcade.Window):
         # init score for keeping track of hits
         self.score = 0
 
+        self.isInteractive = False
+
         arcade.set_background_color(arcade.csscolor.LIGHT_CYAN)
 
     def advance_song(self):
@@ -241,6 +243,11 @@ class SootheGame(arcade.Window):
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+        
+        if self.isInteractive:
+            if key == arcade.key.ENTER:
+                arcade.load_textures("test-game-KG\images\loading.png")
+                
 
     def on_key_release(self, key, modifiers):
 
@@ -248,6 +255,8 @@ class SootheGame(arcade.Window):
             self.player_sprite.change_x = 0
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_sprite.change_x = 0
+        elif key == arcade.key.ENTER:
+            self.isInteractive = False
     
     def on_update(self, delta_time):
 
@@ -286,6 +295,8 @@ class SootheGame(arcade.Window):
 
         for hit in door_collision_list:
             self.add_triggers(hit)
+            self.isInteractive = True
+            
 
         changed = False
 
