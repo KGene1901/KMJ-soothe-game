@@ -2,6 +2,7 @@ import arcade
 import time
 import random
 import os
+
 file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
 
@@ -27,21 +28,21 @@ BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
 
 MUSIC_VOLUME = 0.5
+
 class MenuView(arcade.View):
     """ Class that manages the 'menu' view. """
     def __init__(self):
-
         super().__init__()
 
     def on_show(self):
         """ Called when switching to this view"""
         arcade.set_background_color(arcade.color.LIGHT_CYAN)
+        arcade.set_viewport(0,SCREEN_WIDTH,0,SCREEN_HEIGHT)
 
     def on_draw(self):
         """ Draw the menu """
         arcade.start_render()
-        arcade.draw_text("Soothe", SCREEN_WIDTH/2, SCREEN_WIDTH/2,
-                         arcade.color.BLACK, font_size=50, anchor_x="center")
+        arcade.draw_text("Soothe", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,arcade.color.PINK, font_size=50, anchor_x="center")
         arcade.draw_text("Press any key to advance.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-75,
                          arcade.color.GRAY, font_size=20, anchor_x="center")
 
@@ -399,6 +400,7 @@ class PauseView(arcade.View):
                          arcade.color.BLACK,
                          font_size=20,
                          anchor_x="center")
+
         arcade.draw_text("Press Enter to go back to main menu",
                          player_sprite.left+50,
                          SCREEN_HEIGHT/2-30,
