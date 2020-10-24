@@ -7,17 +7,21 @@ SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Test-Game"
 
-CHARACTER_SCALING = 0.8
-ENEMY_SCALING = 0.3
+CHARACTER_SCALING = 2.5
+CLOUD_SCALING = 0.3
+ENEMY_SCALING = 3
 TILE_SCALING = 0.5
 DOOR_SCALING = 1.3
 SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
-PLAYER_MOVEMENT_SPEED = 10
+PLAYER_MOVEMENT_SPEED = 12
+UPDATES_PER_FRAME = 5
 GRAVITY = 1.1
 PLAYER_JUMP_SPEED = 20
+RIGHT_FACING = 0
+LEFT_FACING = 1
 
 LEFT_VIEWPORT_MARGIN = 250
 RIGHT_VIEWPORT_MARGIN = 250
@@ -25,7 +29,6 @@ BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
 
 MUSIC_VOLUME = 0.1
-
 
 class SootheGame(arcade.Window):
     """
@@ -74,6 +77,8 @@ class SootheGame(arcade.Window):
 
         self.isInteractive = False
 
+        self.background = None
+
         arcade.set_background_color(arcade.csscolor.LIGHT_CYAN)
 
     def advance_song(self):
@@ -97,6 +102,7 @@ class SootheGame(arcade.Window):
 
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
+        self.background = arcade.load_texture("test-game-KG\images\Background\stress_background_png.png")
         # Create the Sprite lists
         self.player_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
@@ -108,9 +114,9 @@ class SootheGame(arcade.Window):
         self.trigger_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player
-        self.player_sprite = arcade.Sprite(":resources:images/enemies/slimeBlock.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
+        self.player_sprite = arcade.Sprite("test-game-KG\sprites\player_sprite\idle1.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
         self.player_sprite.center_x = 64
-        self.player_sprite.center_y = 115
+        self.player_sprite.center_y = 100
         self.player_list.append(self.player_sprite)
 
         # List of music
@@ -122,7 +128,8 @@ class SootheGame(arcade.Window):
 
         # Create the ground
         for x in range(0, 2000, 64):
-            wall = arcade.Sprite(":resources:images/tiles/grassMid.png", TILE_SCALING)
+            # wall = arcade.Sprite(":resources:images/tiles/grassMid.png", TILE_SCALING)
+            wall = arcade.Sprite("test-game-KG\sprites\grass_tile.png", 2)
             wall.center_x = x
             wall.center_y = 32
             self.wall_list.append(wall)
@@ -131,7 +138,7 @@ class SootheGame(arcade.Window):
         for x in range(700, 1250, 250):
             doorMid = arcade.Sprite(":resources:images/tiles/doorClosed_mid.png", DOOR_SCALING)
             doorMid.center_x = x
-            doorMid.center_y = 147.5
+            doorMid.center_y = 143
             self.doorMid_list.append(doorMid)
 
             doorTop = arcade.Sprite(":resources:images/tiles/doorClosed_top.png", DOOR_SCALING)
@@ -143,11 +150,11 @@ class SootheGame(arcade.Window):
         arcade.schedule(self.add_enemy, 1)
 
         # Spawn a new cloud every 0.75 seconds
-        arcade.schedule(self.add_cloud, 0.75)
+        arcade.schedule(self.add_cloud, 0.6)
 
         # Adding + removing quotes with a viewing interval of 10 seconds
         arcade.schedule(self.add_quote, 15)
-        arcade.schedule(self.remove_quote, 20)
+        arcade.schedule(self.remove_quote, 10)
         arcade.schedule(self.remove_triggers, 0.02)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
@@ -168,7 +175,7 @@ class SootheGame(arcade.Window):
 
     def add_enemy(self, delta_time: float):
 
-        enemy = arcade.Sprite(":resources:images/enemies/ladybug.png", ENEMY_SCALING)
+        enemy = arcade.Sprite("test-game-KG\sprites\squish.png", ENEMY_SCALING)
         enemy.center_x = random.randint(10,2000)
         enemy.center_y = 70
         self.enemy_list.append(enemy)
@@ -177,9 +184,9 @@ class SootheGame(arcade.Window):
 
     def add_cloud(self, delta_time: float):
 
-        cloud = arcade.Sprite("test-game-KG/sprites/198daeda14097d45e417e62ff283f10e.png", ENEMY_SCALING)
+        cloud = arcade.Sprite("test-game-KG\sprites\cloud.png", CLOUD_SCALING)
         cloud.center_x = random.randint(0,2400)
-        cloud.center_y = 650
+        cloud.center_y = random.randint(600,650)
         self.cloud_list.append(cloud)
         cloud.velocity = (-2,0)
 
@@ -214,11 +221,14 @@ class SootheGame(arcade.Window):
         # Clear the screen to the background color
         arcade.start_render()
 
+        arcade.draw_lrwh_rectangle_textured(-500, 0,
+                                            SCREEN_WIDTH+1900, SCREEN_HEIGHT,
+                                            self.background)
         # Draw sprites
         self.wall_list.draw()
-        self.player_list.draw()
         self.doorMid_list.draw()
         self.doorTop_list.draw()
+        self.player_list.draw()
         self.enemy_list.draw()
         self.cloud_list.draw()
         self.quote_list.draw()
@@ -232,6 +242,8 @@ class SootheGame(arcade.Window):
         score_text = f"Hits: {self.score}"
         arcade.draw_text(score_text, 10 + self.view_left, 620 + self.view_bottom,
                          arcade.csscolor.BLACK, 18)
+        
+
 
     def on_key_press(self, key, modifiers):
 
@@ -246,8 +258,10 @@ class SootheGame(arcade.Window):
         
         if self.isInteractive:
             if key == arcade.key.ENTER:
-                arcade.load_textures("test-game-KG\images\loading.png")
-                
+                game_view = StressLevel()
+                game_view.setup()
+                self.window.show_view(game_view)
+                        
 
     def on_key_release(self, key, modifiers):
 
@@ -264,8 +278,8 @@ class SootheGame(arcade.Window):
         self.cloud_list.update()
         self.physics_engine.update()
 
-        if self.player_sprite.center_y <= 100:
-            self.player_sprite.center_y = 115
+        if self.player_sprite.center_y <= 76 or self.player_sprite.center_x < -20 or self.player_sprite.center_x > 2300:
+            self.player_sprite.center_y = 100
             self.player_sprite.center_x = 64
 
         for enemy in self.enemy_list:
@@ -337,10 +351,10 @@ class SootheGame(arcade.Window):
                                 SCREEN_HEIGHT + self.view_bottom)
 
 
-
 def main():
     window = SootheGame()
     window.setup()
+    arcade.finish_render()
     arcade.run()
 
 
