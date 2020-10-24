@@ -16,7 +16,7 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
 PLAYER_MOVEMENT_SPEED = 10
-GRAVITY = 1.3
+GRAVITY = 1.1
 PLAYER_JUMP_SPEED = 20
 
 LEFT_VIEWPORT_MARGIN = 250
@@ -24,7 +24,7 @@ RIGHT_VIEWPORT_MARGIN = 250
 BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
 
-MUSIC_VOLUME = 0.5
+MUSIC_VOLUME = 0.1
 
 
 class SootheGame(arcade.Window):
@@ -48,19 +48,31 @@ class SootheGame(arcade.Window):
         self.enemy_list = None
         self.cloud_list = None
 
+        # initiating physics engine
         self.physics_engine = None
 
+        # init player sprite
         self.player_sprite = None
 
+        # init viewports
         self.view_bottom = 0
         self.view_left = 0
 
         self.hit_enemy_sound = arcade.load_sound("test-game-KG/sounds/Bubble-wrap-popping.mp3")
         # self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 
+        # init quotes sprite
         self.quote_list = None
         self.quotes = []
         self.current_quote = 0 
+
+        # init level trigger
+        self.trigger_list = None
+
+        # init score for keeping track of hits
+        self.score = 0
+
+        self.isInteractive = False
 
         arcade.set_background_color(arcade.csscolor.LIGHT_CYAN)
 
@@ -93,6 +105,7 @@ class SootheGame(arcade.Window):
         self.enemy_list = arcade.SpriteList()
         self.cloud_list = arcade.SpriteList(use_spatial_hash=True)
         self.quote_list = arcade.SpriteList(use_spatial_hash=True)
+        self.trigger_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player
         self.player_sprite = arcade.Sprite(":resources:images/enemies/slimeBlock.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
@@ -104,6 +117,8 @@ class SootheGame(arcade.Window):
         self.music_list = ["test-game-KG/sounds/2020-09-14_-_Mellow_Thoughts_-_www.FesliyanStudios.com_David_Renda.mp3", "test-game-KG/sounds/relaxing lofi for late nights...😴 (128 kbps).mp3", "test-game-KG/sounds/2019-06-12_-_Homework_-_David_Fesliyan.mp3"]
         self.current_song = 0
         self.play_song()
+
+        self.score = 0
 
         # Create the ground
         for x in range(0, 2000, 64):
@@ -132,7 +147,8 @@ class SootheGame(arcade.Window):
 
         # Adding + removing quotes with a viewing interval of 10 seconds
         arcade.schedule(self.add_quote, 15)
-        arcade.schedule(self.remove_quote, 25)
+        arcade.schedule(self.remove_quote, 20)
+        arcade.schedule(self.remove_triggers, 0.02)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
 
@@ -169,22 +185,27 @@ class SootheGame(arcade.Window):
 
     def add_quote(self, delta_time: float):
 
-        self.quotes = ["test-game-KG\quotes/a1db7eca7d435fd9690e4748d3f91220.png"]
+        self.quotes = ["test-game-KG/quotes/a1db7eca7d435fd9690e4748d3f91220.png", "test-game-KG/quotes/d6360d549c2b85fd4ec30cc44b0af930.png", "test-game-KG\quotes/3540c344e617725d1a26fe3b4332048c.png", "test-game-KG/quotes/9ff607bc2e850fef7bc06478dba885e9.png"]
         self.current_quote = random.randint(0, len(self.quotes)-1)
         quote = arcade.Sprite(self.quotes[self.current_quote], TILE_SCALING)
         player_pos = self.player_sprite.center_x
-
-        if player_pos >= 40:
-            quote.center_x = player_pos + 100
-        else:
-            quote.center_x = 500
-
+        quote.center_x = 1000
         quote.center_y = 30
         self.quote_list.append(quote)
 
     def remove_quote(self, delta_time: float):
         for quote in self.quote_list:
             quote.remove_from_sprite_lists()
+
+    def add_triggers(self, door_sprite):
+        trigger = arcade.Sprite("test-game-KG\sprites\level-trigger.png", TILE_SCALING)
+        trigger.center_x = door_sprite.center_x
+        trigger.center_y = door_sprite.center_y + 200
+        self.trigger_list.append(trigger)
+
+    def remove_triggers(self, delta_time: float):
+        for trigger in self.trigger_list:
+            trigger.remove_from_sprite_lists()
         
 
     def on_draw(self):
@@ -201,10 +222,16 @@ class SootheGame(arcade.Window):
         self.enemy_list.draw()
         self.cloud_list.draw()
         self.quote_list.draw()
+        self.trigger_list.draw()
 
         start_x = 70
         start_y = 400
         arcade.draw_text("Soothe Yourself", start_x, start_y, arcade.color.BLACK, 60, font_name='GARA')
+
+        # Draw our score on the screen, scrolling it with the viewport
+        score_text = f"Hits: {self.score}"
+        arcade.draw_text(score_text, 10 + self.view_left, 620 + self.view_bottom,
+                         arcade.csscolor.BLACK, 18)
 
     def on_key_press(self, key, modifiers):
 
@@ -216,6 +243,11 @@ class SootheGame(arcade.Window):
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+        
+        if self.isInteractive:
+            if key == arcade.key.ENTER:
+                arcade.load_textures("test-game-KG\images\loading.png")
+                
 
     def on_key_release(self, key, modifiers):
 
@@ -223,6 +255,8 @@ class SootheGame(arcade.Window):
             self.player_sprite.change_x = 0
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_sprite.change_x = 0
+        elif key == arcade.key.ENTER:
+            self.isInteractive = False
     
     def on_update(self, delta_time):
 
@@ -254,6 +288,15 @@ class SootheGame(arcade.Window):
             enemy.remove_from_sprite_lists()
             # Play a sound
             arcade.play_sound(self.hit_enemy_sound)
+            self.score += 1
+
+        door_collision_list = arcade.check_for_collision_with_list(self.player_sprite,
+                                                             self.doorMid_list)
+
+        for hit in door_collision_list:
+            self.add_triggers(hit)
+            self.isInteractive = True
+            
 
         changed = False
 
