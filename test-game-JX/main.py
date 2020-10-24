@@ -21,8 +21,8 @@ PLAYER_MOVEMENT_SPEED = 10
 GRAVITY = 1.1
 PLAYER_JUMP_SPEED = 20
 
-LEFT_VIEWPORT_MARGIN = 250
-RIGHT_VIEWPORT_MARGIN = 250
+LEFT_VIEWPORT_MARGIN = SCREEN_WIDTH/2
+RIGHT_VIEWPORT_MARGIN = SCREEN_WIDTH/2
 BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
 
@@ -233,7 +233,6 @@ class GameView(arcade.View):
             self.add_triggers(hit)
             self.isInteractive = True
             
-
         changed = False
 
         # Scroll left
@@ -369,7 +368,7 @@ class PauseView(arcade.View):
 
     def on_show(self):
         arcade.set_background_color(arcade.color.ORANGE)
-
+        
     def on_draw(self):
         arcade.start_render()
 
@@ -384,20 +383,24 @@ class PauseView(arcade.View):
                                           right=player_sprite.right,
                                           top=player_sprite.top,
                                           bottom=player_sprite.bottom,
-                                          color=arcade.color.ORANGE + (200,))
+                                          color=arcade.color.ORANGE + (80,))
 
-        arcade.draw_text("PAUSED", SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50,
-                         arcade.color.BLACK, font_size=50, anchor_x="center")
+        # Show PAUSED text and hints on return and exit
+        arcade.draw_text("PAUSED", 
+                         player_sprite.left+50,
+                         SCREEN_HEIGHT/2+50,
+                         arcade.color.BLACK, 
+                         font_size=50, anchor_x="center")
 
-        # Show tip to return or reset
+        
         arcade.draw_text("Press Esc. to return",
-                         SCREEN_WIDTH/2,
+                         player_sprite.left+50,
                          SCREEN_HEIGHT/2,
                          arcade.color.BLACK,
                          font_size=20,
                          anchor_x="center")
         arcade.draw_text("Press Enter to go back to main menu",
-                         SCREEN_WIDTH/2,
+                         player_sprite.left+50,
                          SCREEN_HEIGHT/2-30,
                          arcade.color.BLACK,
                          font_size=20,
