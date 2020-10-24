@@ -15,7 +15,7 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
-PLAYER_MOVEMENT_SPEED = 13
+PLAYER_MOVEMENT_SPEED = 10
 GRAVITY = 1.3
 PLAYER_JUMP_SPEED = 20
 
@@ -58,6 +58,10 @@ class SootheGame(arcade.Window):
         self.hit_enemy_sound = arcade.load_sound("test-game-KG/sounds/Bubble-wrap-popping.mp3")
         # self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 
+        self.quote_list = None
+        self.quotes = []
+        self.current_quote = 0 
+
         arcade.set_background_color(arcade.csscolor.LIGHT_CYAN)
 
     def advance_song(self):
@@ -88,6 +92,7 @@ class SootheGame(arcade.Window):
         self.doorTop_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
         self.cloud_list = arcade.SpriteList(use_spatial_hash=True)
+        self.quote_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player
         self.player_sprite = arcade.Sprite(":resources:images/enemies/slimeBlock.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
@@ -120,10 +125,14 @@ class SootheGame(arcade.Window):
             self.doorTop_list.append(doorTop)
 
         # Spawn a new enemy every 0.25 seconds
-        arcade.schedule(self.add_enemy, 1.2)
+        arcade.schedule(self.add_enemy, 1)
 
         # Spawn a new cloud every 0.75 seconds
         arcade.schedule(self.add_cloud, 0.75)
+
+        # Adding + removing quotes with a viewing interval of 10 seconds
+        arcade.schedule(self.add_quote, 15)
+        arcade.schedule(self.remove_quote, 25)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
 
@@ -144,10 +153,10 @@ class SootheGame(arcade.Window):
     def add_enemy(self, delta_time: float):
 
         enemy = arcade.Sprite(":resources:images/enemies/ladybug.png", ENEMY_SCALING)
-        enemy.center_x = random.randint(100,2000)
+        enemy.center_x = random.randint(10,2000)
         enemy.center_y = 70
         self.enemy_list.append(enemy)
-        enemy.velocity = (random.randint(-20, -5), 0)
+        enemy.velocity = (random.randint(-15, -2), 0)
 
 
     def add_cloud(self, delta_time: float):
@@ -157,6 +166,26 @@ class SootheGame(arcade.Window):
         cloud.center_y = 650
         self.cloud_list.append(cloud)
         cloud.velocity = (-2,0)
+
+    def add_quote(self, delta_time: float):
+
+        self.quotes = ["test-game-KG\quotes/a1db7eca7d435fd9690e4748d3f91220.png"]
+        self.current_quote = random.randint(0, len(self.quotes)-1)
+        quote = arcade.Sprite(self.quotes[self.current_quote], TILE_SCALING)
+        player_pos = self.player_sprite.center_x
+
+        if player_pos >= 40:
+            quote.center_x = player_pos + 100
+        else:
+            quote.center_x = 500
+
+        quote.center_y = 30
+        self.quote_list.append(quote)
+
+    def remove_quote(self, delta_time: float):
+        for quote in self.quote_list:
+            quote.remove_from_sprite_lists()
+        
 
     def on_draw(self):
         """ Render the screen. """
@@ -171,6 +200,7 @@ class SootheGame(arcade.Window):
         self.doorTop_list.draw()
         self.enemy_list.draw()
         self.cloud_list.draw()
+        self.quote_list.draw()
 
         start_x = 70
         start_y = 400
