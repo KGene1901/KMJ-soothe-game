@@ -136,6 +136,7 @@ class GameView(arcade.View):
     def setup(self):
 
         # Set up the backgrounds
+        self.background = arcade.load_texture("assets\\images\\Background\\stress_background_png.png")
         self.background2 = arcade.load_texture("assets\\images\\Background\\computer_breaker_nodithering.png")
         
         # Create the Sprite lists
