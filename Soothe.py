@@ -20,7 +20,7 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
 PLAYER_MOVEMENT_SPEED = 7
-SPECIAL_SPEED = 2
+SPECIAL_SPEED = 1
 GRAVITY = 1.7
 PLAYER_JUMP_SPEED = 20
 
@@ -294,13 +294,13 @@ class GameView(arcade.View):
         self.trigger_list.draw()
         self.dialogue_list.draw()
 
-        arcade.draw_text("Soothe Yourself", 70, 3400, arcade.color.BLACK, 60, font_name='GARA')
+        arcade.draw_text("Soothe", 70, 3400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Stress Reliever", 70, 400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Enlighten", 70, -2650, arcade.color.WHITE, 60, font_name='GARA')
 
         # Draw our score on the screen, scrolling it with the viewport
         score_text = f"Hits: {self.score}"
-        arcade.draw_text(score_text, 10 + self.view_left, 620 + self.view_bottom,
+        arcade.draw_text(score_text, 10 + self.view_left, 634,
                          arcade.csscolor.BLACK, 18)
                          
     def on_update(self, delta_time):
@@ -623,6 +623,7 @@ class GameView(arcade.View):
         if self.isInteractive:
             if key == arcade.key.ENTER:
                 if self.levelSelector == 0:
+                    self.score = 0
                     self.player_sprite.center_x = 64
                     self.player_sprite.center_y = 3400
                 elif self.levelSelector == 1:
@@ -715,22 +716,23 @@ class GameView(arcade.View):
 
 class PauseView(arcade.View):
     def __init__(self, game_view):
+
         super().__init__()
         self.game_view = game_view
-
+    
+    # Called when switching to this view
     def on_show(self):
         arcade.set_background_color(arcade.color.ORANGE)
-
+    
+    # Render the screen
     def on_draw(self):
         arcade.start_render()
 
-        # Draw player, for effect, on pause screen.
-        # The previous View (GameView) was passed in
-        # and saved in self.game_view.
+        # Draw player on pause screen
         player_sprite = self.game_view.player_sprite
         player_sprite.draw()
 
-        # draw an orange filter over him
+        # Draw an orange filter over him
         arcade.draw_lrtb_rectangle_filled(left=player_sprite.left,
                                           right=player_sprite.right,
                                           top=player_sprite.top,
@@ -759,11 +761,13 @@ class PauseView(arcade.View):
                          font_size=20,
                          anchor_x="center")
 
+    # Detect individual key presses
     def on_key_press(self, key, _modifiers):
         if key == arcade.key.ESCAPE:   # resume game
             self.window.show_view(self.game_view)
         elif key == arcade.key.ENTER:  # go to main menu
             menu_view = MenuView()
+            self.score = 0
             self.window.show_view(menu_view)
 
 def main():
