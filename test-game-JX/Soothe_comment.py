@@ -288,14 +288,16 @@ class GameView(arcade.View):
         self.trigger_list.draw()
 
         # Draw level names
-        arcade.draw_text("Soothe Yourself", 70, 3400, arcade.color.BLACK, 60, font_name='GARA')
+        arcade.draw_text("Soothe", 70, 3400, arcade.color.PINK, 60, font_name='GARA')
         arcade.draw_text("Stress Reliever", 70, 400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Enlighten", 70, -2650, arcade.color.WHITE, 60, font_name='GARA')
 
         # Draw our score on the screen, scrolling it with the viewport
         score_text = f"Hits: {self.score}"
-        arcade.draw_text(score_text, 10 + self.view_left, 620 + self.view_bottom,
+        arcade.draw_text(score_text, 10 + self.view_left, 634,
                          arcade.csscolor.BLACK, 18)
+
+        print(620 + self.view_bottom)
                          
     def on_update(self, delta_time):
 
@@ -431,6 +433,7 @@ class GameView(arcade.View):
         if self.isInteractive:
             if key == arcade.key.ENTER:
                 if self.levelSelector == 0:
+                    self.score = 0
                     self.player_sprite.center_x = 64
                     self.player_sprite.center_y = 3400
                 elif self.levelSelector == 1:
@@ -583,6 +586,7 @@ class PauseView(arcade.View):
             self.window.show_view(self.game_view)
         elif key == arcade.key.ENTER:  # go to main menu
             menu_view = MenuView()
+            self.score = 0
             self.window.show_view(menu_view)
 
 def main():
