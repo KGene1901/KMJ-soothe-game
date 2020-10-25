@@ -19,8 +19,9 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
-PLAYER_MOVEMENT_SPEED = 15
-GRAVITY = 1.1
+PLAYER_MOVEMENT_SPEED = 7
+SPECIAL_SPEED = 3
+GRAVITY = 1.7
 PLAYER_JUMP_SPEED = 20
 
 LEFT_VIEWPORT_MARGIN = SCREEN_WIDTH/2
@@ -103,9 +104,12 @@ class GameView(arcade.View):
 
         # init personalized bg
         self.background = None
+        self.background2 = None
 
         # init level selector
         self.levelSelector = 0
+
+        self.slowDown = False
 
     def on_show(self):
         """ Called when switching to this view"""
@@ -114,8 +118,10 @@ class GameView(arcade.View):
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
         self.background = arcade.load_texture("assets\\images\\Background\\stress_background_png.png")
+        self.background2 = arcade.load_texture("assets\\images\\Background\\computer_breaker_nodithering.png")
         # Create the Sprite lists
         self.player_list = arcade.SpriteList()
+        self.player_sprite = arcade.AnimatedWalkingSprite()
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.doorMid_list = arcade.SpriteList()
         self.endDoor_list= arcade.SpriteList()
@@ -128,10 +134,29 @@ class GameView(arcade.View):
         self.drawer_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player
-        self.player_sprite = arcade.Sprite("assets\\sprites\\player_sprite\\idle1.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
+        # self.player_sprite = arcade.Sprite("assets\\sprites\\player_sprite\\idle1.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
         self.player_sprite.center_x = 64
-        # self.player_sprite.center_y = 92
         self.player_sprite.center_y = 3400
+        self.player_sprite.scale = CHARACTER_SCALING
+        self.player_sprite.stand_right_textures = []
+        self.player_sprite.stand_left_textures = []
+        self.player_sprite.stand_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\right_idle1.png"))
+        self.player_sprite.stand_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\right_idle2.png"))
+        self.player_sprite.stand_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\right_idle1.png", mirrored=True))
+        self.player_sprite.stand_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\right_idle2.png", mirrored=True))
+
+        self.player_sprite.walk_right_textures = []
+        self.player_sprite.walk_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right1.png"))
+        self.player_sprite.walk_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right2.png"))
+        self.player_sprite.walk_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right3.png"))
+        self.player_sprite.walk_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right4.png"))
+
+        self.player_sprite.walk_left_textures = []
+        self.player_sprite.walk_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right1.png", mirrored=True))
+        self.player_sprite.walk_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right2.png", mirrored=True))
+        self.player_sprite.walk_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right3.png", mirrored=True))
+        self.player_sprite.walk_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right4.png", mirrored=True))
+
         self.player_list.append(self.player_sprite)
 
         # List of music
@@ -151,7 +176,8 @@ class GameView(arcade.View):
             wall.center_y = 32
             self.wall_list.append(wall)
 
-            wall= arcade.Sprite("assets\\sprites\\grass_tile.png", 2)
+        for x in range(0, 6000, 64):
+            wall= arcade.Sprite("assets\\sprites\\white_tile.png", 4)
             wall.center_x = x
             wall.center_y = -3000
             self.wall_list.append(wall)
@@ -169,7 +195,7 @@ class GameView(arcade.View):
         self.endDoor_list.append(endDoor)
 
         endDoor = arcade.Sprite("assets\\sprites\\door.png", DOOR_SCALING)
-        endDoor.center_x = 1900
+        endDoor.center_x = 5910
         endDoor.center_y = -2900
         self.endDoor_list.append(endDoor)
 
@@ -219,7 +245,7 @@ class GameView(arcade.View):
         arcade.schedule(self.add_quote, 15)
         arcade.schedule(self.remove_quote, 10)
         arcade.schedule(self.remove_triggers, 0.02)
-        arcade.schedule(self.reset_level_selector, 2)
+        # arcade.schedule(self.reset_level_selector, 2)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
 
@@ -245,6 +271,9 @@ class GameView(arcade.View):
         arcade.draw_lrwh_rectangle_textured(-500, 0,
                                             SCREEN_WIDTH+2000, SCREEN_HEIGHT+200,
                                             self.background)
+        arcade.draw_lrwh_rectangle_textured(-500, -3100,
+                                            SCREEN_WIDTH+4700, SCREEN_HEIGHT+300,
+                                            self.background2)
 
         # Draw sprites
         self.bottomWall_list.draw()
@@ -261,6 +290,7 @@ class GameView(arcade.View):
 
         arcade.draw_text("Soothe Yourself", 70, 3400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Stress Reliever", 70, 400, arcade.color.BLACK, 60, font_name='GARA')
+        arcade.draw_text("Enlighten", 70, -2650, arcade.color.WHITE, 60, font_name='GARA')
 
         # Draw our score on the screen, scrolling it with the viewport
         score_text = f"Hits: {self.score}"
@@ -269,22 +299,24 @@ class GameView(arcade.View):
                          
     def on_update(self, delta_time):
 
+        self.player_list.update()
+        self.player_list.update_animation()
         self.enemy_list.update()
         self.cloud_list.update()
         self.physics_engine.update()
 
-        if self.player_sprite.center_x < -20 or self.player_sprite.center_x > 2000:
-            if self.levelSelector == 0:
+        if self.levelSelector != 2:
+            if self.player_sprite.center_x < -20 or self.player_sprite.center_x > 2000:
+                if self.levelSelector == 0:
+                        self.player_sprite.center_x = 64
+                        self.player_sprite.center_y = 3400
+                elif self.levelSelector == 1:
                     self.player_sprite.center_x = 64
-                    self.player_sprite.center_y = 3400
-                    self.arcade.set_background_color((153, 178, 188))
-            elif self.levelSelector == 1:
-                self.player_sprite.center_x = 64
-                self.player_sprite.center_y = 92
-            elif self.levelSelector == 2:
-                self.player_sprite.center_x = 64
-                self.player_sprite.center_y = -3000
-                self.arcade.set_background_color((0, 0, 0))
+                    self.player_sprite.center_y = 92
+        else:
+            if self.player_sprite.center_x < -20 or self.player_sprite.center_x > 6300:
+                    self.player_sprite.center_x = 64
+                    self.player_sprite.center_y = -2900
 
         for enemy in self.enemy_list:
             if enemy.center_x < 40:
@@ -317,6 +349,7 @@ class GameView(arcade.View):
                 self.levelSelector = 1
             elif hit.center_x == 950:
                 self.levelSelector = 2
+                self.slowDown = True
 
         endDoor_collision_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                              self.endDoor_list)
@@ -372,10 +405,22 @@ class GameView(arcade.View):
                 # arcade.play_sound(self.jump_sound)
 
         elif key == arcade.key.LEFT or key == arcade.key.A:
-            self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
+            if not self.slowDown:
+                self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
+            else:
+                if self.player_sprite.center_y <= -2000:
+                    self.player_sprite.change_x = -SPECIAL_SPEED
+                else:
+                    self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
 
         elif key == arcade.key.RIGHT or key == arcade.key.D:
-            self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+            if not self.slowDown:
+                self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+            else:
+                if self.player_sprite.center_y <= -2000:
+                    self.player_sprite.change_x = SPECIAL_SPEED
+                else:
+                    self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
         elif key == arcade.key.ESCAPE:
             pause = PauseView(self)
@@ -392,7 +437,7 @@ class GameView(arcade.View):
                     self.player_sprite.center_y = 92
                 elif self.levelSelector == 2:
                     self.player_sprite.center_x = 64
-                    self.player_sprite.center_y = -3000
+                    self.player_sprite.center_y = -2900
 
     def on_key_release(self, key, modifiers):
 
