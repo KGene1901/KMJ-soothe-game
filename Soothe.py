@@ -20,7 +20,7 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
 PLAYER_MOVEMENT_SPEED = 7
-SPECIAL_SPEED = 3
+SPECIAL_SPEED = 2
 GRAVITY = 1.7
 PLAYER_JUMP_SPEED = 20
 
@@ -93,6 +93,9 @@ class GameView(arcade.View):
         self.quotes = []
         self.current_quote = 0 
 
+        # init dialogue
+        self.dialogue_list = None
+
         # init level trigger
         self.trigger_list = None
 
@@ -132,6 +135,7 @@ class GameView(arcade.View):
         self.quote_list = arcade.SpriteList(use_spatial_hash=True)
         self.trigger_list = arcade.SpriteList(use_spatial_hash=True)
         self.drawer_list = arcade.SpriteList(use_spatial_hash=True)
+        self.dialogue_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player
         # self.player_sprite = arcade.Sprite("assets\\sprites\\player_sprite\\idle1.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
@@ -176,7 +180,7 @@ class GameView(arcade.View):
             wall.center_y = 32
             self.wall_list.append(wall)
 
-        for x in range(0, 6000, 64):
+        for x in range(0, 18000, 64):
             wall= arcade.Sprite("assets\\sprites\\white_tile.png", 4)
             wall.center_x = x
             wall.center_y = -3000
@@ -195,7 +199,7 @@ class GameView(arcade.View):
         self.endDoor_list.append(endDoor)
 
         endDoor = arcade.Sprite("assets\\sprites\\door.png", DOOR_SCALING)
-        endDoor.center_x = 5910
+        endDoor.center_x = 17412
         endDoor.center_y = -2900
         self.endDoor_list.append(endDoor)
 
@@ -235,6 +239,7 @@ class GameView(arcade.View):
         window.center_y = 3121
         self.window_list.append(window)
 
+
         # Spawn a new enemy every 0.25 seconds
         arcade.schedule(self.add_enemy, 1)
 
@@ -272,7 +277,7 @@ class GameView(arcade.View):
                                             SCREEN_WIDTH+2000, SCREEN_HEIGHT+200,
                                             self.background)
         arcade.draw_lrwh_rectangle_textured(-500, -3100,
-                                            SCREEN_WIDTH+4700, SCREEN_HEIGHT+300,
+                                            SCREEN_WIDTH+18000, SCREEN_HEIGHT+300,
                                             self.background2)
 
         # Draw sprites
@@ -287,6 +292,7 @@ class GameView(arcade.View):
         self.cloud_list.draw()
         self.quote_list.draw()
         self.trigger_list.draw()
+        self.dialogue_list.draw()
 
         arcade.draw_text("Soothe Yourself", 70, 3400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Stress Reliever", 70, 400, arcade.color.BLACK, 60, font_name='GARA')
@@ -314,7 +320,7 @@ class GameView(arcade.View):
                     self.player_sprite.center_x = 64
                     self.player_sprite.center_y = 92
         else:
-            if self.player_sprite.center_x < -20 or self.player_sprite.center_x > 6300:
+            if self.player_sprite.center_x < -20 or self.player_sprite.center_x > 18000:
                     self.player_sprite.center_x = 64
                     self.player_sprite.center_y = -2900
 
@@ -358,6 +364,193 @@ class GameView(arcade.View):
             self.add_return_trigger(hit)
             self.isInteractive = True
             self.levelSelector = 0
+
+        # create user-location based dialogue for level 2 
+        if self.player_sprite.center_y <= -2000:
+            if self.player_sprite.center_x == 100:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase1.png", TILE_SCALING)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 200
+                self.dialogue_list.append(dialog)
+
+            elif self.player_sprite.center_x == 852:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase2.png", TILE_SCALING)
+                dialog.center_x = self.player_sprite.center_x - 200
+                dialog.center_y = self.player_sprite.center_y + 350
+                self.dialogue_list.append(dialog) 
+
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase3.png", TILE_SCALING)
+                dialog.center_x = self.player_sprite.center_x - 100
+                dialog.center_y = self.player_sprite.center_y + 200
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 900:
+                dialog = arcade.Sprite("assets\\sprites\\stressed_out_drawing.png", 1.5)
+                dialog.center_x = self.player_sprite.center_x + 300
+                dialog.center_y = self.player_sprite.center_y + 200
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 1504:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase4.png", TILE_SCALING)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 300
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 1800:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase5.png", TILE_SCALING)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 200
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 2356:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase6.png", TILE_SCALING)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 400
+                self.dialogue_list.append(dialog)
+                
+                world_burning = arcade.Sprite("assets\\sprites\\earth_burning.png", 1)
+                world_burning.center_x = self.player_sprite.center_x
+                world_burning.center_y = self.player_sprite.center_y + 200
+                self.dialogue_list.append(world_burning)
+
+            elif self.player_sprite.center_x == 3140:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase7.png", TILE_SCALING)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 500
+                self.dialogue_list.append(dialog) 
+
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase8.png", TILE_SCALING)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 150
+                self.dialogue_list.append(dialog)
+
+            elif self.player_sprite.center_x == 4040:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase9.png", 1.3)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 300
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 5000:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase10.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 300
+                self.dialogue_list.append(dialog) 
+
+                ## spawns in friend here ##
+            elif self.player_sprite.center_x == 5800:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase11.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x + 200
+                dialog.center_y = self.player_sprite.center_y + 300
+                self.dialogue_list.append(dialog) 
+
+                 ## spawns in friend here ##
+            elif self.player_sprite.center_x == 6900:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase12.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 400
+                self.dialogue_list.append(dialog) 
+
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase13.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 300
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 8032:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase14.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 400
+                self.dialogue_list.append(dialog) 
+
+                self_love = arcade.Sprite("assets\\sprites\\self_love.png", 1)
+                self_love.center_x = self.player_sprite.center_x
+                self_love.center_y = self.player_sprite.center_y + 190
+                self.dialogue_list.append(self_love) 
+            
+            elif self.player_sprite.center_x == 9004:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase15.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 250
+                self.dialogue_list.append(dialog) 
+            
+            elif self.player_sprite.center_x == 9460:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase16.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 150
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 10684:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase17.png", 0.8)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 150
+                self.dialogue_list.append(dialog) 
+            
+            elif self.player_sprite.center_x == 11624:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase18.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 150
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 12812:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase19.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 420
+                self.dialogue_list.append(dialog)
+
+                hope = arcade.Sprite("assets\\sprites\\hope.png", 1)
+                hope.center_x = self.player_sprite.center_x
+                hope.center_y = self.player_sprite.center_y + 260
+                self.dialogue_list.append(hope)  
+
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase20.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 100
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 13536:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase21.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 150
+                self.dialogue_list.append(dialog) 
+            
+            elif self.player_sprite.center_x == 14520:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase22.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 150
+                self.dialogue_list.append(dialog) 
+
+            elif self.player_sprite.center_x == 15064:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase23.png", 0.7)
+                dialog.center_x = self.player_sprite.center_x
+                dialog.center_y = self.player_sprite.center_y + 150
+                self.dialogue_list.append(dialog) 
+            
+            elif self.player_sprite.center_x == 16728:
+                self.reset_array(self.dialogue_list)
+                dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase24.png", 0.5)
+                dialog.center_x = self.player_sprite.center_x + 110
+                dialog.center_y = self.player_sprite.center_y + 150
+                self.dialogue_list.append(dialog) 
+
+
             
         changed = False
 
@@ -515,6 +708,10 @@ class GameView(arcade.View):
 
     def reset_level_selector(self, delta_time: float):
         self.levelSelector = 0
+
+    def reset_array(self, sprite_array):
+        for item in sprite_array:
+            item.remove_from_sprite_lists()
 
 class PauseView(arcade.View):
     def __init__(self, game_view):
