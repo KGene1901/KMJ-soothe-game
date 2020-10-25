@@ -37,24 +37,28 @@ MUSIC_VOLUME = 0.1
 
 # Class that manages the 'menu' view.
 class MenuView(arcade.View):
-
+    """ Class that manages the 'menu' view. """
     def __init__(self):
         super().__init__()
+        self.logo = arcade.load_texture("assets\\logo_soothe.png")
 
     def on_show(self):
-        # Called when switching to this view
+        """ Called when switching to this view"""
         arcade.set_background_color(arcade.color.LIGHT_CYAN)
         arcade.set_viewport(0,SCREEN_WIDTH,0,SCREEN_HEIGHT)
 
     def on_draw(self):
-        # Draw the menu
+        """ Draw the menu """
         arcade.start_render()
-        arcade.draw_text("Soothe", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,arcade.color.PINK, font_size=50, anchor_x="center")
+        # arcade.draw_text("Soothe", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,arcade.color.PINK, font_size=50, anchor_x="center")
+        arcade.draw_lrwh_rectangle_textured(SCREEN_WIDTH/3-30, SCREEN_HEIGHT/2-100,
+                                            400, 300,
+                                            self.logo)
         arcade.draw_text("Press any key to advance.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-75,
                          arcade.color.GRAY, font_size=20, anchor_x="center")
 
     def on_key_press(self, key, modifiers):
-        # Use a key press to advance to the 'game' view.
+        """ Use a key press to advance to the 'game' view. """
         game_view = GameView()
         game_view.setup()
         self.window.show_view(game_view)
