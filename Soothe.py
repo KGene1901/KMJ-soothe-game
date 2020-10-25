@@ -787,7 +787,7 @@ class PauseView(arcade.View):
                                           top=player_sprite.top,
                                           bottom=player_sprite.bottom,
                                           color=arcade.color.ORANGE + (80,))
-        print(player_sprite.bottom)
+
         # Show PAUSED text and hints on return and exit
         arcade.draw_text("PAUSED", 
                          player_sprite.center_x,
