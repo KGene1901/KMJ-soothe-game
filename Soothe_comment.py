@@ -41,6 +41,7 @@ class MenuView(arcade.View):
     def __init__(self):
 
         super().__init__()
+        self.logo = None
         
 
     def on_show(self):
@@ -48,12 +49,21 @@ class MenuView(arcade.View):
         arcade.set_background_color(arcade.color.LIGHT_CYAN)
         arcade.set_viewport(0,SCREEN_WIDTH,0,SCREEN_HEIGHT)
 
+    def setup(self):
+        self.logo = arcade.SpriteList()
+
+        Soothe = arcade.load_texture("assets\\images\\logo_soothe.png")
+        Soothe.center_x = SCREEN_WIDTH/2
+        Soothe.center_y = SCREEN_HEIGHT/2
+        self.logo.append(Soothe)
+
     def on_draw(self):
         # Draw the menu
         arcade.start_render()
         arcade.draw_text("Soothe", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,arcade.color.PINK, font_size=50, anchor_x="center")
         arcade.draw_text("Press any key to advance.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-75,
                          arcade.color.GRAY, font_size=20, anchor_x="center")
+        self.logo.draw()
 
     def on_key_press(self, key, modifiers):
         # Use a key press to advance to the 'game' view.

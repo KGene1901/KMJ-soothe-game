@@ -14,6 +14,7 @@ SCREEN_HEIGHT = 650
 # Sprite scale and sizes
 CHARACTER_SCALING = 2.5
 ENEMY_SCALING = 3
+COMPANION_SCALING = 2
 CLOUD_SCALING = 0.3
 TILE_SCALING = 0.5
 DOOR_SCALING = 0.42
@@ -91,6 +92,9 @@ class GameView(arcade.View):
 
         # init player sprite
         self.player_sprite = None
+  
+        # init companion sprite      
+        self.companion_list = None
 
         # init viewports
         self.view_bottom = 0
@@ -153,6 +157,8 @@ class GameView(arcade.View):
         self.trigger_list = arcade.SpriteList(use_spatial_hash=True)
         self.drawer_list = arcade.SpriteList(use_spatial_hash=True)
         self.dialogue_list = arcade.SpriteList(use_spatial_hash=True)
+
+        self.companion_list = arcade.SpriteList()
 
         # Set up the player
         self.player_sprite.center_x = 64
@@ -257,7 +263,7 @@ class GameView(arcade.View):
 
         # Spawn a new enemy every 0.25 seconds
         arcade.schedule(self.add_enemy, 1)
-
+        # arcade.schedule(self.add_companion, 1)
         # Spawn a new cloud every 0.75 seconds
         arcade.schedule(self.add_cloud, 0.75)
 
@@ -298,6 +304,8 @@ class GameView(arcade.View):
         self.trigger_list.draw()
         self.dialogue_list.draw()
 
+        self.companion_list.draw()
+
         # Draw level names
         arcade.draw_text("Soothe", 70, 3400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Stress Reliever", 70, 400, arcade.color.BLACK, 60, font_name='GARA')
@@ -316,6 +324,8 @@ class GameView(arcade.View):
         self.cloud_list.update()
         self.physics_engine.update()
 
+        self.companion_list.update()
+
         if self.player_sprite.center_y > -2000:
             if self.player_sprite.center_x < -20 or self.player_sprite.center_x > 2000:
                 if self.player_sprite.center_y < 3400 and self.player_sprite.center_y > 3000:
@@ -332,6 +342,10 @@ class GameView(arcade.View):
         for enemy in self.enemy_list:
             if enemy.center_x < 40:
                 enemy.remove_from_sprite_lists()
+
+        for companion in self.companion_list:
+            if companion.center_x < 40:
+                companion.remove_from_sprite_lists()
 
         position = self.music.get_stream_position()
         if position == 0.0:
@@ -389,7 +403,7 @@ class GameView(arcade.View):
                 dialog = arcade.Sprite("assets\\sprites\\level-2-phrases\\phrase3.png", TILE_SCALING)
                 dialog.center_x = self.player_sprite.center_x - 100
                 dialog.center_y = self.player_sprite.center_y + 200
-                self.dialogue_list.append(dialog) 
+                self.dialogue_list.append(dialog)
 
             elif self.player_sprite.center_x == 900:
                 dialog = arcade.Sprite("assets\\sprites\\stressed_out_drawing.png", 1.5)
@@ -448,6 +462,9 @@ class GameView(arcade.View):
                 dialog.center_x = self.player_sprite.center_x
                 dialog.center_y = self.player_sprite.center_y + 300
                 self.dialogue_list.append(dialog) 
+                self.add_companion()
+                self.add_companion()
+                self.add_companion()
 
                 ## spawns in friend here ##
             elif self.player_sprite.center_x == 5800:
@@ -456,6 +473,9 @@ class GameView(arcade.View):
                 dialog.center_x = self.player_sprite.center_x + 200
                 dialog.center_y = self.player_sprite.center_y + 300
                 self.dialogue_list.append(dialog) 
+                self.add_companion()
+                self.add_companion()
+                self.add_companion()
 
                  ## spawns in friend here ##
             elif self.player_sprite.center_x == 6900:
@@ -690,6 +710,14 @@ class GameView(arcade.View):
         self.enemy_list.append(enemy)
         enemy.velocity = (random.randint(-15, -2), 0)
 
+    # Add companion sprite
+    def add_companion(self):
+        companion = arcade.Sprite("assets\\sprites\\companion.png", COMPANION_SCALING)
+        companion.center_x = self.player_sprite.center_x - SCREEN_WIDTH/4
+        companion.center_y = -2940
+        self.companion_list.append(companion)
+        companion.velocity = (3, 0)
+
     # Add motivational quotes
     def add_quote(self, delta_time: float):
 
@@ -759,7 +787,7 @@ class PauseView(arcade.View):
                                           top=player_sprite.top,
                                           bottom=player_sprite.bottom,
                                           color=arcade.color.ORANGE + (80,))
-
+        print(player_sprite.bottom)
         # Show PAUSED text and hints on return and exit
         arcade.draw_text("PAUSED", 
                          player_sprite.center_x,
