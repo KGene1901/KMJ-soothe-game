@@ -3,13 +3,15 @@ import time
 import random
 import os
 
+# Change current directory to the directory of this python file
 file_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(file_path)
 
+# Screen parameters
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
-SCREEN_TITLE = "Test-Game"
 
+# Sprite scale and sizes
 CHARACTER_SCALING = 2.5
 ENEMY_SCALING = 3
 CLOUD_SCALING = 0.3
@@ -20,16 +22,20 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
 PLAYER_MOVEMENT_SPEED = 7
-SPECIAL_SPEED = 2
+SPECIAL_SPEED = 3
 GRAVITY = 1.7
 PLAYER_JUMP_SPEED = 20
 
+# Viewport parameters
 LEFT_VIEWPORT_MARGIN = SCREEN_WIDTH/2
 RIGHT_VIEWPORT_MARGIN = SCREEN_WIDTH/2
 BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 300
+
+# Music parameter
 MUSIC_VOLUME = 0.1
 
+# Class that manages the 'menu' view.
 class MenuView(arcade.View):
     """ Class that manages the 'menu' view. """
     def __init__(self):
@@ -57,18 +63,19 @@ class MenuView(arcade.View):
         game_view.setup()
         self.window.show_view(game_view)
 
+# Manage the 'game' view for our program.
 class GameView(arcade.View):
-    """ Manage the 'game' view for our program. """
+
     def __init__(self):
 
         super().__init__()
 
-        # music
+        # init music
         self.music_list = []
         self.current_song = 0
         self.music = None
 
-        # sprite lists
+        # init sprite lists
         self.wall_list = None
         self.player_list = None
         self.doorMid_list = None
@@ -79,7 +86,7 @@ class GameView(arcade.View):
         self.enemy_list = None
         self.cloud_list = None
 
-        # initiating physics engine
+        # init physics engine
         self.physics_engine = None
 
         # init player sprite
@@ -89,8 +96,8 @@ class GameView(arcade.View):
         self.view_bottom = 0
         self.view_left = 0
 
+        # init collision sound
         self.hit_enemy_sound = arcade.load_sound("assets\\sounds\\Bubble-wrap-popping.mp3")
-        # self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 
         # init quotes sprite
         self.quote_list = None
@@ -109,23 +116,29 @@ class GameView(arcade.View):
         # init interactive settings
         self.isInteractive = False
 
-        # init personalized bg
+        # init personalized background
         self.background = None
         self.background2 = None
 
         # init level selector
         self.levelSelector = 0
 
+        # init speed toggle
         self.slowDown = False
 
+    # Called when switching to this view
     def on_show(self):
-        """ Called when switching to this view"""
+
+        # Sets the background color
         arcade.set_background_color((153, 178, 188))
 
+    # Set up the game here. Call this function to restart the game.
     def setup(self):
-        """ Set up the game here. Call this function to restart the game. """
+
+        # Set up the backgrounds
         self.background = arcade.load_texture("assets\\images\\Background\\stress_background_png.png")
         self.background2 = arcade.load_texture("assets\\images\\Background\\computer_breaker_nodithering.png")
+        
         # Create the Sprite lists
         self.player_list = arcade.SpriteList()
         self.player_sprite = arcade.AnimatedWalkingSprite()
@@ -142,7 +155,6 @@ class GameView(arcade.View):
         self.dialogue_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player
-        # self.player_sprite = arcade.Sprite("assets\\sprites\\player_sprite\\idle1.png", CHARACTER_SCALING) # example: :resources:images/enemies/slimeBlock.png
         self.player_sprite.center_x = 64
         self.player_sprite.center_y = 3400
         self.player_sprite.scale = CHARACTER_SCALING
@@ -221,8 +233,7 @@ class GameView(arcade.View):
             lining.center_y = 3046.5
             self.bottomWall_list.append(lining)
 
-
-        # creating windows
+        # Creates windows
         window = arcade.Sprite("assets\\sprites\\lobby_window.png", DOOR_SCALING-0.1)
         window.center_x = 100
         window.center_y = 3121
@@ -256,11 +267,13 @@ class GameView(arcade.View):
         arcade.schedule(self.remove_triggers, 0.02)
         arcade.schedule(self.reset_level_selector, 2)
 
+        # Adding parameters to physics engine
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
+
         pass
 
+    # Render the screen
     def on_draw(self):
-        """ Render the screen. """
 
         # Clear the screen to the background color
         arcade.start_render()
@@ -285,6 +298,7 @@ class GameView(arcade.View):
         self.trigger_list.draw()
         self.dialogue_list.draw()
 
+        # Draw level names
         arcade.draw_text("Soothe", 70, 3400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Stress Reliever", 70, 400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Enlighten", 70, -2650, arcade.color.WHITE, 60, font_name='GARA')
@@ -356,7 +370,7 @@ class GameView(arcade.View):
             self.isInteractive = True
             self.levelSelector = 0
 
-        # create user-location based dialogue for level 2 
+        # Create user-location based dialogue for level 2 
         if self.player_sprite.center_y <= -2000:
             if self.player_sprite.center_x == 100:
                 self.reset_array(self.dialogue_list)
@@ -583,13 +597,13 @@ class GameView(arcade.View):
                                 SCREEN_WIDTH + self.view_left,
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
-    
+
+    # Detect individual key presses    
     def on_key_press(self, key, modifiers):
 
         if key == arcade.key.UP or key == arcade.key.W or key == arcade.key.SPACE:
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = PLAYER_JUMP_SPEED
-                # arcade.play_sound(self.jump_sound)
 
         elif key == arcade.key.LEFT or key == arcade.key.A:
             if not self.slowDown:
@@ -627,6 +641,7 @@ class GameView(arcade.View):
                     self.player_sprite.center_x = 64
                     self.player_sprite.center_y = -2900
 
+    # Detect individual key releases
     def on_key_release(self, key, modifiers):
 
         if key == arcade.key.LEFT or key == arcade.key.A:
@@ -636,6 +651,7 @@ class GameView(arcade.View):
         elif key == arcade.key.ENTER:
             self.isInteractive = False
 
+    # Play next song
     def advance_song(self):
         """ Advance our pointer to the next song. This does NOT start the song. """
         self.current_song += 1
@@ -643,8 +659,9 @@ class GameView(arcade.View):
             self.current_song = 0
         print(f"Advancing song to {self.current_song}.")
 
+    # Start playing song
     def play_song(self):
-        """ Play the song. """
+
         # Stop what is currently playing.
         if self.music:
             self.music.stop()
@@ -655,6 +672,7 @@ class GameView(arcade.View):
         self.music.play(MUSIC_VOLUME)
         time.sleep(0.03)
 
+    # Add cloud sprite
     def add_cloud(self, delta_time: float):
 
         cloud = arcade.Sprite("assets\\sprites\\cloud.png", CLOUD_SCALING)
@@ -663,6 +681,7 @@ class GameView(arcade.View):
         self.cloud_list.append(cloud)
         cloud.velocity = (-2,0)
 
+    # Add enemy sprite
     def add_enemy(self, delta_time: float):
 
         enemy = arcade.Sprite("assets\\sprites\\squish.png", ENEMY_SCALING)
@@ -671,6 +690,7 @@ class GameView(arcade.View):
         self.enemy_list.append(enemy)
         enemy.velocity = (random.randint(-15, -2), 0)
 
+    # Add motivational quotes
     def add_quote(self, delta_time: float):
 
         self.quotes = ["assets\\quotes\\9ff607bc2e850fef7bc06478dba885e9.png", "assets\\quotes\\d6360d549c2b85fd4ec30cc44b0af930.png", "assets\\quotes\\3540c344e617725d1a26fe3b4332048c.png", "assets\\quotes\\9ff607bc2e850fef7bc06478dba885e9.png"]
@@ -681,33 +701,40 @@ class GameView(arcade.View):
         quote.center_y = 30
         self.quote_list.append(quote)
 
+    # Remove motivational quotes
     def remove_quote(self, delta_time: float):
         for quote in self.quote_list:
             quote.remove_from_sprite_lists()
 
+    # Add collision for door to allow level selection
     def add_triggers(self, door_sprite):
         trigger = arcade.Sprite("assets\\sprites\\level-trigger.png", TILE_SCALING)
         trigger.center_x = door_sprite.center_x
         trigger.center_y = door_sprite.center_y + 120
         self.trigger_list.append(trigger)
 
+    # Remove collision for door to allow level selection
     def remove_triggers(self, delta_time: float):
         for trigger in self.trigger_list:
             trigger.remove_from_sprite_lists()
-         
+
+    # Add collision for door to allow return selection 
     def add_return_trigger(self, door_sprite):
         trigger = arcade.Sprite("assets\\sprites\\return_trigger.png", TILE_SCALING)
         trigger.center_x = door_sprite.center_x
         trigger.center_y = door_sprite.center_y + 120
         self.trigger_list.append(trigger)
 
+    # Allow level selection
     def reset_level_selector(self, delta_time: float):
         self.levelSelector = 0
 
+    # Allow player to return to level selection
     def reset_array(self, sprite_array):
         for item in sprite_array:
             item.remove_from_sprite_lists()
 
+# Class that manages the 'pause' view.
 class PauseView(arcade.View):
     def __init__(self, game_view):
 
@@ -765,7 +792,7 @@ class PauseView(arcade.View):
             self.window.show_view(menu_view)
 
 def main():
-    """ Startup """
+    # Startup
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Soothe")
     menu_view = MenuView()
     window.show_view(menu_view)
