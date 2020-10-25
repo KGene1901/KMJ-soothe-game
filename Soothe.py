@@ -20,7 +20,7 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
 PLAYER_MOVEMENT_SPEED = 7
-SPECIAL_SPEED = 1
+SPECIAL_SPEED = 1.5
 GRAVITY = 1.7
 PLAYER_JUMP_SPEED = 20
 
@@ -250,7 +250,7 @@ class GameView(arcade.View):
         arcade.schedule(self.add_quote, 15)
         arcade.schedule(self.remove_quote, 10)
         arcade.schedule(self.remove_triggers, 0.02)
-        # arcade.schedule(self.reset_level_selector, 2)
+        arcade.schedule(self.reset_level_selector, 2)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
 
@@ -311,12 +311,12 @@ class GameView(arcade.View):
         self.cloud_list.update()
         self.physics_engine.update()
 
-        if self.levelSelector != 2:
+        if self.player_sprite.center_y > -2000:
             if self.player_sprite.center_x < -20 or self.player_sprite.center_x > 2000:
-                if self.levelSelector == 0:
+                if self.player_sprite.center_y < 3400 and self.player_sprite.center_y > 3000:
                         self.player_sprite.center_x = 64
                         self.player_sprite.center_y = 3400
-                elif self.levelSelector == 1:
+                elif self.player_sprite.center_y < 92:
                     self.player_sprite.center_x = 64
                     self.player_sprite.center_y = 92
         else:
@@ -550,8 +550,6 @@ class GameView(arcade.View):
                 dialog.center_y = self.player_sprite.center_y + 150
                 self.dialogue_list.append(dialog) 
 
-
-            
         changed = False
 
         # Scroll left
