@@ -20,7 +20,7 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player
 PLAYER_MOVEMENT_SPEED = 7
-SPECIAL_SPEED = 1.5
+SPECIAL_SPEED = 2
 GRAVITY = 1.7
 PLAYER_JUMP_SPEED = 20
 
@@ -549,6 +549,11 @@ class GameView(arcade.View):
                 dialog.center_x = self.player_sprite.center_x + 110
                 dialog.center_y = self.player_sprite.center_y + 150
                 self.dialogue_list.append(dialog) 
+
+                amazing = arcade.Sprite("assets\\sprites\\you_are_amazing.png", 1.1)
+                amazing.center_x = self.player_sprite.center_x + 100
+                amazing.center_y = self.player_sprite.center_y + 400
+                self.dialogue_list.append(amazing)
 
         changed = False
 
