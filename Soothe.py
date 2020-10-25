@@ -118,7 +118,7 @@ class GameView(arcade.View):
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
         self.background = arcade.load_texture("assets\\images\\Background\\stress_background_png.png")
-        self.background2 = arcade.load_texture("assets\\images\\Background\\lonely.jpg")
+        self.background2 = arcade.load_texture("assets\\images\\Background\\computer_breaker_nodithering.png")
         # Create the Sprite lists
         self.player_list = arcade.SpriteList()
         self.player_sprite = arcade.AnimatedWalkingSprite()
@@ -140,8 +140,10 @@ class GameView(arcade.View):
         self.player_sprite.scale = CHARACTER_SCALING
         self.player_sprite.stand_right_textures = []
         self.player_sprite.stand_left_textures = []
-        self.player_sprite.stand_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right2.png"))
-        self.player_sprite.stand_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right2.png", mirrored=True))
+        self.player_sprite.stand_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\right_idle1.png"))
+        self.player_sprite.stand_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\right_idle2.png"))
+        self.player_sprite.stand_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\right_idle1.png", mirrored=True))
+        self.player_sprite.stand_left_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\right_idle2.png", mirrored=True))
 
         self.player_sprite.walk_right_textures = []
         self.player_sprite.walk_right_textures.append(arcade.load_texture("assets\\sprites\\player_sprite\\walk-right1.png"))
@@ -175,7 +177,7 @@ class GameView(arcade.View):
             self.wall_list.append(wall)
 
         for x in range(0, 6000, 64):
-            wall= arcade.Sprite("assets\\sprites\\grass_tile.png", 2)
+            wall= arcade.Sprite("assets\\sprites\\white_tile.png", 4)
             wall.center_x = x
             wall.center_y = -3000
             self.wall_list.append(wall)
@@ -270,7 +272,7 @@ class GameView(arcade.View):
                                             SCREEN_WIDTH+2000, SCREEN_HEIGHT+200,
                                             self.background)
         arcade.draw_lrwh_rectangle_textured(-500, -3100,
-                                            SCREEN_WIDTH+2200, SCREEN_HEIGHT+300,
+                                            SCREEN_WIDTH+4700, SCREEN_HEIGHT+300,
                                             self.background2)
 
         # Draw sprites
@@ -288,6 +290,7 @@ class GameView(arcade.View):
 
         arcade.draw_text("Soothe Yourself", 70, 3400, arcade.color.BLACK, 60, font_name='GARA')
         arcade.draw_text("Stress Reliever", 70, 400, arcade.color.BLACK, 60, font_name='GARA')
+        arcade.draw_text("Enlighten", 70, -2650, arcade.color.WHITE, 60, font_name='GARA')
 
         # Draw our score on the screen, scrolling it with the viewport
         score_text = f"Hits: {self.score}"
