@@ -34,6 +34,7 @@ class MenuView(arcade.View):
     """ Class that manages the 'menu' view. """
     def __init__(self):
         super().__init__()
+        self.logo = arcade.load_texture("assets\\logo_soothe.png")
 
     def on_show(self):
         """ Called when switching to this view"""
@@ -43,7 +44,10 @@ class MenuView(arcade.View):
     def on_draw(self):
         """ Draw the menu """
         arcade.start_render()
-        arcade.draw_text("Soothe", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,arcade.color.PINK, font_size=50, anchor_x="center")
+        # arcade.draw_text("Soothe", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,arcade.color.PINK, font_size=50, anchor_x="center")
+        arcade.draw_lrwh_rectangle_textured(SCREEN_WIDTH/3-30, SCREEN_HEIGHT/2-100,
+                                            400, 300,
+                                            self.logo)
         arcade.draw_text("Press any key to advance.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-75,
                          arcade.color.GRAY, font_size=20, anchor_x="center")
 
@@ -253,19 +257,6 @@ class GameView(arcade.View):
         arcade.schedule(self.reset_level_selector, 2)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
-
-        # Put some crates on the ground
-        # This shows using a coordinate list to place sprites
-        # coordinate_list = [[256, 96],
-        #                    [512, 96],
-        #                    [768, 96]]
-
-        # for coordinate in coordinate_list:
-        #     # Add a crate on the ground
-        #     wall = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", TILE_SCALING)
-        #     wall.position = coordinate
-        #     self.wall_list.append(wall)
-
         pass
 
     def on_draw(self):
